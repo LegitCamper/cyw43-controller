@@ -5,10 +5,10 @@ description = "Resident CYW43439 ISO controller patch images and their ABI manif
 categories = ["embedded", "no-std"]
 keywords = ["bluetooth", "cyw43", "iso", "firmware"]
 edition.workspace = true
-license.workspace = true
+license-file = "PACKAGE-LICENSE.md"
 repository.workspace = true
 rust-version.workspace = true
-include = ["src/**", "blobs/**", "firmware/**", "licenses/**", "tests/**", "build.rs", "README.md"]
+include = ["src/**", "blobs/**", "firmware/**", "licenses/**", "tests/**", "build.rs", "PACKAGE-LICENSE.md", "README.md"]
 
 [features]
 default = []
