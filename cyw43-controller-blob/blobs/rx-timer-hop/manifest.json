@@ -2,7 +2,7 @@
   "abi_version": 1,
   "controller": "CYW43439",
   "firmware": "0065",
-  "diagnostic": "dtm_countdown_csa2_hopping_rx",
+  "diagnostic": "marker_acquired_dtm_countdown_csa2_hopping_rx",
   "runtime_install_required": true,
   "rom_sha256": "d5e271f20c80293be3561bb63e92ce4f6ca563ecca8fffd81eba639de9354038",
   "bootstrap_address": 855952,
@@ -37,7 +37,10 @@
     "event_counter_initial": 0,
     "channel_map": "all_37_data_channels",
     "nominal_interval_us": 20000,
-    "countdown_ticks_per_event": 32
+    "countdown_ticks_per_event": 32,
+    "acquisition": "first_crc_valid_counter_marker",
+    "acquisition_index": "payload_bytes_0_1_little_endian_u16",
+    "acquisition_suffix": "payload_bytes_2_25_equal_2_through_25"
   },
   "pointer_installation": {
     "transport_context_pointer_address": 2105116,
@@ -67,12 +70,14 @@
     "hop_advance": 1024,
     "hop_initial": 1050,
     "hop_trace": 1096,
-    "countdown": 1120,
+    "countdown": 1132,
     "channel_config": 1280,
-    "csa2": 1408
+    "csa2": 1408,
+    "marker_acquire": 1536
   },
   "limitations": [
-    "open_loop_counter_without_BIGInfo_anchor",
+    "counter_marker_fixture_acquisition_not_BIGInfo_synchronization",
+    "first_valid_marker_only_no_reacquisition",
     "one_lossy_snapshot_mailbox",
     "625us_DTM_scheduler_tick_is_static_not_measured_for_this_image",
     "retune_boundary_not_live_validated",
@@ -84,11 +89,23 @@
   "files": {
     "native.bin": {
       "size": 2048,
-      "sha256": "60f0e127a36b0d0a04c4ee0860280ce2f170344a46f24097acac9c11744bdf5a"
+      "sha256": "db0bb61072703378ce944975ab092c1b8ee34c1a3adf80e20aa9b46410bede82"
     },
     "allocator.bin": {
       "size": 112,
       "sha256": "dc1c2dfabb13f4a8de26ab8328de4def56944d2d646bbe65cf201295bdbc4d47"
     }
+  },
+  "diagnostic_trace": {
+    "offset": 1096,
+    "u32_fields": [
+      "event_counter",
+      "current_channel",
+      "channel_configuration_count",
+      "ticks_remaining",
+      "accepted_countdown_callbacks",
+      "completed_event_advances",
+      "marker_synchronized"
+    ]
   }
 }

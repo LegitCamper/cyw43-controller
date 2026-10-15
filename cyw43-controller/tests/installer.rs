@@ -346,14 +346,14 @@ fn rx_timer_hop_installs_distinct_image_and_decodes_its_trace() {
     assert_eq!(runner.word(0x203a80), ALLOCATION + 256);
 
     let trace_address = ALLOCATION + rx_timer_hop::offsets::HOP_TRACE;
-    for (index, value) in [0xffff, 36, 0x1020_3040, 17, 0x5060_7080, 0x90a0_b0c0]
+    for (index, value) in [0xffff, 36, 0x1020_3040, 17, 0x5060_7080, 0x90a0_b0c0, 1]
         .into_iter()
         .enumerate()
     {
         runner.put(trace_address + index as u32 * 4, value);
     }
     let trace = ready(installed.read_timer_hop_trace(&mut runner)).unwrap();
-    assert_eq!(runner.reads.last(), Some(&(trace_address, 24)));
+    assert_eq!(runner.reads.last(), Some(&(trace_address, 28)));
     assert_eq!(
         trace,
         runtime::TimerHopTrace {
@@ -363,6 +363,7 @@ fn rx_timer_hop_installs_distinct_image_and_decodes_its_trace() {
             ticks_remaining: 17,
             accepted_callbacks: 0x5060_7080,
             completed_advances: 0x90a0_b0c0,
+            marker_acquired: 1,
         }
     );
 }

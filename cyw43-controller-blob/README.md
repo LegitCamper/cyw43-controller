@@ -14,7 +14,7 @@ carries the bytes and the addresses an installer needs.
 | `rx` | `rx` | 1024 | One-shot fixed-channel receive, one SDU |
 | `rx-stream` | `rx-stream` | 1024 | Continuous fixed-channel receive through a rearmed single-slot mailbox |
 | `rx-hop` | `rx-hop` | 2048 | Open-loop CSA#2 receive, advanced by matching RX callbacks |
-| `rx-timer-hop` | `rx-timer-hop` | 2048 | Open-loop CSA#2 receive, advanced by stock DTM countdown callbacks |
+| `rx-timer-hop` | `rx-timer-hop` | 2048 | Marker-acquired CSA#2 receive, advanced by stock DTM countdown callbacks |
 
 This crate installs nothing: installation order, verification and rollback
 belong to the host driver.

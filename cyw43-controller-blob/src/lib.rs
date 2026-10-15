@@ -208,12 +208,13 @@ pub mod rx_hop {
     }
 }
 
-/// Continuous timer-driven CSA#2 hopping receive.
+/// Marker-acquired, timer-driven CSA#2 hopping receive.
 ///
 /// The controller advances every 32 accepted stock DTM scheduler countdown
 /// callbacks, independently of receive completion. The nominal 20-ms cadence
 /// and RF retune boundary still require live validation, and event zero has no
-/// BIGInfo-derived anchor.
+/// BIGInfo-derived anchor. The first valid diagnostic counter marker can align
+/// the event counter and nominal interval phase once.
 #[cfg(feature = "rx-timer-hop")]
 pub mod rx_timer_hop {
     /// Resident image.
@@ -253,13 +254,15 @@ pub mod rx_timer_hop {
         pub const HOP_ADVANCE: u32 = 1024;
         /// Event-zero channel setup and countdown callback installation.
         pub const HOP_INITIAL: u32 = 1050;
-        /// Six-word timer and channel diagnostic trace.
+        /// Seven-word timer, channel and marker-acquisition diagnostic trace.
         pub const HOP_TRACE: u32 = 1096;
         /// Stock-countdown wrapper.
-        pub const COUNTDOWN: u32 = 1120;
+        pub const COUNTDOWN: u32 = 1132;
         /// MMIO channel programming routine.
         pub const CHANNEL_CONFIG: u32 = 1280;
         /// Relocation-free CSA#2 routine.
         pub const CSA2: u32 = 1408;
+        /// One-shot diagnostic counter-marker acquisition routine.
+        pub const MARKER_ACQUIRE: u32 = 1536;
     }
 }

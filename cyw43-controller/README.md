@@ -13,5 +13,6 @@ qualified Bluetooth implementation and not standard CIS/BIG negotiation. Every
 error or cancelled future requires a chip restart and firmware reload.
 
 Receive diagnostics include fixed-channel streaming, receive-driven CSA#2 and
-timer-driven CSA#2. The timer image exposes a read-only six-word trace for live
-cadence validation; it still has no BIGInfo-derived anchor.
+timer-driven CSA#2. The timer image can acquire once from a diagnostic counter
+marker and exposes a read-only seven-word trace for live cadence validation; it
+still has no BIGInfo-derived anchor.

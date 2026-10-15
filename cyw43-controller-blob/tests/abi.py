@@ -154,7 +154,8 @@ check("rx_timer_hop::pointers::COUNTDOWN_TABLE_SLOT",
       timer_hop["pointer_installation"]["countdown_table_slot"])
 for name, key in (("HOP_ADVANCE", "hop_advance"), ("HOP_INITIAL", "hop_initial"),
                   ("HOP_TRACE", "hop_trace"), ("COUNTDOWN", "countdown"),
-                  ("CHANNEL_CONFIG", "channel_config"), ("CSA2", "csa2")):
+                  ("CHANNEL_CONFIG", "channel_config"), ("CSA2", "csa2"),
+                  ("MARKER_ACQUIRE", "marker_acquire")):
     check(f"rx_timer_hop::offsets::{name}", module_constant("rx_timer_hop", name, 10),
           timer_hop["resident_offsets"][key])
 for name, key, radix in (("ACCESS_ADDRESS", "access_address", 16),
@@ -166,6 +167,12 @@ for name, key, radix in (("ACCESS_ADDRESS", "access_address", 16),
                          ("EXPECTED_RAW_HEADER", "expected_raw_header", 16)):
     check(f"rx_timer_hop::radio::{name}", module_constant("rx_timer_hop", name, radix),
           timer_hop["radio"][key])
+check("rx_timer_hop diagnostic trace offset",
+      module_constant("rx_timer_hop", "HOP_TRACE", 10), timer_hop["diagnostic_trace"]["offset"])
+check("rx_timer_hop diagnostic trace fields", timer_hop["diagnostic_trace"]["u32_fields"], [
+    "event_counter", "current_channel", "channel_configuration_count", "ticks_remaining",
+    "accepted_countdown_callbacks", "completed_event_advances", "marker_synchronized"
+])
 
 if failures:
     print("\n".join(failures), file=sys.stderr)
