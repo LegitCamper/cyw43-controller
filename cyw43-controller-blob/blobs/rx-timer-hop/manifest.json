@@ -41,7 +41,9 @@
     "preacquisition_scan": "one_csa2_event_candidate_per_accepted_countdown_callback",
     "acquisition": "first_crc_valid_counter_marker",
     "acquisition_index": "payload_bytes_0_1_little_endian_u16",
-    "acquisition_suffix": "payload_bytes_2_25_equal_2_through_25"
+    "acquisition_suffix": "payload_bytes_2_25_equal_2_through_25",
+    "retune_rearm": "stock_rx_arming_sequence_0x714a4_after_every_timer_retune",
+    "retune_requires_current_event": true
   },
   "pointer_installation": {
     "transport_context_pointer_address": 2105116,
@@ -72,6 +74,7 @@
     "hop_initial": 1050,
     "hop_trace": 1100,
     "countdown": 1132,
+    "timer_rearm": 1250,
     "channel_config": 1280,
     "csa2": 1408,
     "marker_acquire": 1536
@@ -82,7 +85,7 @@
     "one_lossy_snapshot_mailbox",
     "preacquisition_scan_is_diagnostic_not_standard_discovery",
     "625us_DTM_scheduler_tick_is_static_not_measured_for_this_image",
-    "retune_boundary_not_live_validated",
+    "timer_retune_with_stock_rearm_not_live_validated",
     "no_RF_loss_accounting",
     "no_standard_BIG_creation_CIS_or_encryption",
     "exclusive_stock_DTM_event_no_radio_coexistence",
@@ -91,7 +94,7 @@
   "files": {
     "native.bin": {
       "size": 2048,
-      "sha256": "5657f8bad24d5987d67788d46d79173b35a8f0ffbf84c69b9be34edbf0d43090"
+      "sha256": "7272b1bfa277c7c1ccd20a3381a1069a131b4e6a4f573434da4cd605b4630419"
     },
     "allocator.bin": {
       "size": 112,

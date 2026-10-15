@@ -19,7 +19,7 @@ not duplicated per image.
 | `rx` | `rx` | 1024 | One-shot fixed-channel receive, one SDU |
 | `rx-stream` | `rx-stream` | 1024 | Continuous fixed-channel receive through a rearmed single-slot mailbox |
 | `rx-hop` | `rx-hop` | 2048 | Open-loop CSA#2 receive, advanced by matching RX callbacks |
-| `rx-timer-hop` | `rx-timer-hop` | 2048 | Fast pre-acquisition CSA#2 scan, then marker-aligned timer hopping |
+| `rx-timer-hop` | `rx-timer-hop` | 2048 | Fast pre-acquisition CSA#2 scan with stock RX rearm, then marker-aligned timer hopping |
 
 This crate installs nothing: installation order, verification and rollback
 belong to the host driver.

@@ -171,13 +171,16 @@ check("rx_timer_hop diagnostic", timer_hop["diagnostic"],
       "marker_scan_acquired_dtm_countdown_csa2_hopping_rx")
 check("rx_timer_hop preacquisition scan", timer_hop["radio"]["preacquisition_scan"],
       "one_csa2_event_candidate_per_accepted_countdown_callback")
+check("rx_timer_hop retune rearm", timer_hop["radio"]["retune_rearm"],
+      "stock_rx_arming_sequence_0x714a4_after_every_timer_retune")
+check("rx_timer_hop retune currency", timer_hop["radio"]["retune_requires_current_event"], True)
 check("rx_timer_hop::pointers::COUNTDOWN_TABLE_SLOT",
       module_constant("rx_timer_hop", "COUNTDOWN_TABLE_SLOT", 10),
       timer_hop["pointer_installation"]["countdown_table_slot"])
 for name, key in (("HOP_ADVANCE", "hop_advance"), ("HOP_INITIAL", "hop_initial"),
                   ("HOP_TRACE", "hop_trace"), ("COUNTDOWN", "countdown"),
-                  ("CHANNEL_CONFIG", "channel_config"), ("CSA2", "csa2"),
-                  ("MARKER_ACQUIRE", "marker_acquire")):
+                  ("TIMER_REARM", "timer_rearm"), ("CHANNEL_CONFIG", "channel_config"),
+                  ("CSA2", "csa2"), ("MARKER_ACQUIRE", "marker_acquire")):
     check(f"rx_timer_hop::offsets::{name}", module_constant("rx_timer_hop", name, 10),
           timer_hop["resident_offsets"][key])
 for name, key, radix in (("ACCESS_ADDRESS", "access_address", 16),

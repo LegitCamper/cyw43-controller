@@ -218,10 +218,13 @@ pub mod rx_hop {
 /// Marker-acquired, timer-driven CSA#2 hopping receive.
 ///
 /// Before acquisition, every accepted stock DTM countdown callback advances
-/// one CSA#2 event candidate and retunes. The first valid diagnostic counter
-/// marker can align the event counter and nominal interval phase once; after
-/// that the controller advances every 32 callbacks. Timing and RF boundaries
-/// still require live validation, and this has no BIGInfo-derived anchor.
+/// one CSA#2 event candidate, retunes, and re-runs the stock RX arming
+/// sequence, because the stock countdown callback itself never arms the
+/// receiver in RX mode. The first valid diagnostic counter marker can align
+/// the event counter and nominal interval phase once; after that the
+/// controller advances every 32 callbacks. Retuning is skipped while the
+/// event is not current. Timing and RF boundaries still require live
+/// validation, and this has no BIGInfo-derived anchor.
 #[cfg(feature = "rx-timer-hop")]
 pub mod rx_timer_hop {
     /// Resident image.
@@ -265,6 +268,8 @@ pub mod rx_timer_hop {
         pub const HOP_TRACE: u32 = 1100;
         /// Stock-countdown wrapper.
         pub const COUNTDOWN: u32 = 1132;
+        /// Stock RX arming sequence invoked after each timer retune.
+        pub const TIMER_REARM: u32 = 1250;
         /// MMIO channel programming routine.
         pub const CHANNEL_CONFIG: u32 = 1280;
         /// Relocation-free CSA#2 routine.
