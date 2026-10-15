@@ -17,6 +17,7 @@ continuous = []
 rx = []
 rx-stream = []
 rx-hop = []
+rx-timer-hop = []
 
 [lints]
 workspace = true

@@ -207,3 +207,59 @@ pub mod rx_hop {
         pub const CSA2: u32 = 1280;
     }
 }
+
+/// Continuous timer-driven CSA#2 hopping receive.
+///
+/// The controller advances every 32 accepted stock DTM scheduler countdown
+/// callbacks, independently of receive completion. The nominal 20-ms cadence
+/// and RF retune boundary still require live validation, and event zero has no
+/// BIGInfo-derived anchor.
+#[cfg(feature = "rx-timer-hop")]
+pub mod rx_timer_hop {
+    /// Resident image.
+    pub const IMAGE: &[u8; 2048] = include_bytes!("../blobs/rx-timer-hop/native.bin");
+    /// Guarded bootstrap built for this image's reservation size.
+    pub const ALLOCATOR: &[u8; 112] = include_bytes!("../blobs/rx-timer-hop/allocator.bin");
+    /// Bytes the installer must reserve.
+    pub const ALLOCATION_BYTES: u32 = 2048;
+
+    /// Timer-specific callback-table layout.
+    pub mod pointers {
+        /// Cloned-table slot for the stock-countdown wrapper.
+        pub const COUNTDOWN_TABLE_SLOT: usize = 9;
+    }
+
+    /// Fixed identity, channel-selection and nominal timer parameters.
+    pub mod radio {
+        /// BIS access address.
+        pub const ACCESS_ADDRESS: u32 = 0x718e_bed6;
+        /// BIS CRC initialiser.
+        pub const CRC_INIT: u32 = 0x0012_3401;
+        /// CSA#2 channel identifier derived from the access address.
+        pub const CHANNEL_ID: u16 = 0xcf58;
+        /// Initial open-loop event counter.
+        pub const EVENT_COUNTER_INITIAL: u16 = 0;
+        /// Nominal event interval inferred from the stock scheduler.
+        pub const NOMINAL_INTERVAL_US: u32 = 20_000;
+        /// Stock countdown callbacks per event advance.
+        pub const COUNTDOWN_TICKS_PER_EVENT: u32 = 32;
+        /// Raw controller header an accepted packet must present.
+        pub const EXPECTED_RAW_HEADER: u32 = 0x1a00_1a00;
+    }
+
+    /// Additional offsets beyond the shared 1024-byte RX stream image.
+    pub mod offsets {
+        /// Event-counter advance and retune routine.
+        pub const HOP_ADVANCE: u32 = 1024;
+        /// Event-zero channel setup and countdown callback installation.
+        pub const HOP_INITIAL: u32 = 1050;
+        /// Six-word timer and channel diagnostic trace.
+        pub const HOP_TRACE: u32 = 1096;
+        /// Stock-countdown wrapper.
+        pub const COUNTDOWN: u32 = 1120;
+        /// MMIO channel programming routine.
+        pub const CHANNEL_CONFIG: u32 = 1280;
+        /// Relocation-free CSA#2 routine.
+        pub const CSA2: u32 = 1408;
+    }
+}

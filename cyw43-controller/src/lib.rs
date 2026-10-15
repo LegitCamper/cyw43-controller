@@ -1,7 +1,7 @@
 #![no_std]
 #![doc = include_str!("../README.md")]
 
-//! Startup installers for experimental native ISO TX and fixed-channel RX on
+//! Startup installers for experimental native ISO TX and diagnostic RX on
 //! the CYW43439 `.0065` firmware.
 //!
 //! Call after the host driver has loaded firmware and brought Bluetooth up,
@@ -145,10 +145,11 @@ pub async fn install<R: Runtime>(runner: &mut R) -> Result<Installed, Error> {
     }
 }
 
-/// Fixed-channel RX diagnostic delivering complete 26-byte ISO SDUs.
-/// No BIG synchronization, hopping, or codec. The one-shot installer requires
-/// a Read Local Version Information task wake every 250 ms; the stream installer
-/// wakes from radio callbacks. Drain `BtDriver` promptly. Reset ends the session.
+/// RX diagnostic delivering complete 26-byte ISO SDUs.
+///
+/// No mode has BIG synchronization or a codec. The one-shot installer requires
+/// a Read Local Version Information task wake every 250 ms; streaming modes wake
+/// from radio callbacks. Drain `BtDriver` promptly. Reset ends the session.
 pub struct InstalledRxDiagnostic {
     /// Controller-owned allocation, retained until chip restart.
     pub allocation: u32,
@@ -157,9 +158,27 @@ pub struct InstalledRxDiagnostic {
     mode: Mode,
 }
 
+/// Snapshot of the timer-driven hopping image's six-word diagnostic trace.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct TimerHopTrace {
+    /// Current 16-bit CSA#2 event counter, stored in a controller word.
+    pub event_counter: u32,
+    /// Logical data channel most recently programmed.
+    pub current_channel: u32,
+    /// Number of channel configurations, including event zero.
+    pub config_count: u32,
+    /// Accepted countdown callbacks remaining before the next advance.
+    pub ticks_remaining: u32,
+    /// Number of countdown callbacks accepted by the wrapper guards.
+    pub accepted_callbacks: u32,
+    /// Number of timer-driven event advances completed after event zero.
+    pub completed_advances: u32,
+}
+
 impl InstalledRxDiagnostic {
-    /// Start fixed BIS logical channel 0 (2404 MHz), AA 0x718ebed6,
-    /// CRC init 0x123401, whitening enabled, using the stock test-radio scheduler.
+    /// Start AA 0x718ebed6, CRC init 0x123401 and whitening through the stock
+    /// test-radio scheduler. Fixed modes use logical channel 0; hopping modes
+    /// configure their computed event-zero channel.
     /// Requires exclusive ownership of the unstarted runner. Any error or
     /// cancellation requires a chip restart, even if the command was rejected.
     pub async fn start<R: Runtime>(&mut self, runner: &mut R) -> Result<(), Error> {
@@ -204,6 +223,35 @@ impl InstalledRxDiagnostic {
             return Err(Error::Controller);
         }
         Ok(())
+    }
+
+    /// Read timer and channel state from the timer-hop diagnostic image.
+    ///
+    /// This rejects every other RX image. The trace is observational only and
+    /// may change between reads while the controller is running.
+    pub async fn read_timer_hop_trace<R: Runtime>(
+        &self,
+        runner: &mut R,
+    ) -> Result<TimerHopTrace, Error> {
+        if self.mode != Mode::RxTimerHop {
+            return Err(Error::Controller);
+        }
+        let mut bytes = [0; 24];
+        runner
+            .read(
+                self.allocation + blob::rx_timer_hop::offsets::HOP_TRACE,
+                &mut bytes,
+            )
+            .await
+            .map_err(|_| Error::Transport)?;
+        Ok(TimerHopTrace {
+            event_counter: trace_word(&bytes, 0),
+            current_channel: trace_word(&bytes, 4),
+            config_count: trace_word(&bytes, 8),
+            ticks_remaining: trace_word(&bytes, 12),
+            accepted_callbacks: trace_word(&bytes, 16),
+            completed_advances: trace_word(&bytes, 20),
+        })
     }
 
     /// Best-effort restoration before starting the runner; allocation remains.
@@ -253,6 +301,17 @@ pub async fn install_rx_hop_diagnostic<R: Runtime>(
     install_rx(runner, Mode::RxHop).await
 }
 
+/// Install continuous timer-driven CSA#2 hopping RX.
+///
+/// Event zero has no BIGInfo-derived anchor. The image advances every 32 stock
+/// DTM countdown callbacks independently of receive completion; the nominal
+/// 20-ms cadence and RF retune boundary still require live validation.
+pub async fn install_rx_timer_hop_diagnostic<R: Runtime>(
+    runner: &mut R,
+) -> Result<InstalledRxDiagnostic, Error> {
+    install_rx(runner, Mode::RxTimerHop).await
+}
+
 async fn install_rx<R: Runtime>(
     runner: &mut R,
     mode: Mode,
@@ -287,6 +346,7 @@ enum Mode {
     Rx,
     RxStream,
     RxHop,
+    RxTimerHop,
 }
 
 impl Mode {
@@ -317,8 +377,22 @@ impl Mode {
                 blob::rx_hop::ALLOCATOR,
                 blob::rx_hop::ALLOCATION_BYTES,
             ),
+            Self::RxTimerHop => (
+                blob::rx_timer_hop::IMAGE,
+                blob::rx_timer_hop::ALLOCATOR,
+                blob::rx_timer_hop::ALLOCATION_BYTES,
+            ),
         }
     }
+}
+
+fn trace_word(bytes: &[u8; 24], offset: usize) -> u32 {
+    u32::from_le_bytes([
+        bytes[offset],
+        bytes[offset + 1],
+        bytes[offset + 2],
+        bytes[offset + 3],
+    ])
 }
 
 struct Session<'r, R> {

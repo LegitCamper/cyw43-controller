@@ -10,7 +10,7 @@ repository.workspace = true
 rust-version.workspace = true
 
 [dependencies]
-cyw43-controller-blob = { version = "0.1", path = "../cyw43-controller-blob", features = ["continuous", "rx", "rx-stream", "rx-hop"] }
+cyw43-controller-blob = { version = "0.1", path = "../cyw43-controller-blob", features = ["continuous", "rx", "rx-stream", "rx-hop", "rx-timer-hop"] }
 
 [lints]
 workspace = true

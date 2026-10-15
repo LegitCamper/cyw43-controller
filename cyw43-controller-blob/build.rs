@@ -85,7 +85,7 @@ fn field<'a>(json: &'a str, name: &str) -> Option<&'a str> {
 }
 
 fn main() {
-    for image in ["continuous", "rx", "rx-stream", "rx-hop"] {
+    for image in ["continuous", "rx", "rx-stream", "rx-hop", "rx-timer-hop"] {
         let directory = Path::new("blobs").join(image);
         let manifest_path = directory.join("manifest.json");
         let manifest = fs::read_to_string(&manifest_path).expect("manifest");
@@ -100,8 +100,7 @@ fn main() {
             let expected = field(entry, "sha256").expect("sha256");
             let actual = hash(&fs::read(&path).expect(name));
             assert_eq!(
-                actual,
-                expected,
+                actual, expected,
                 "{image}/{name} does not match its manifest SHA-256; \
                  regenerate it in cyw43_iso rather than editing it here"
             );

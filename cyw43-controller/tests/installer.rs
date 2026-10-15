@@ -1,7 +1,7 @@
 //! Installer state-machine checks against an in-memory CYW43439.
 
 use cyw43_controller as runtime;
-use cyw43_controller_blob::{rx_hop, rx_stream};
+use cyw43_controller_blob::{rx_hop, rx_stream, rx_timer_hop};
 use std::{
     collections::BTreeMap,
     future::Future,
@@ -10,6 +10,7 @@ use std::{
 };
 struct Runner {
     memory: BTreeMap<u32, u8>,
+    reads: Vec<(u32, usize)>,
     writes: usize,
     fail_write: Option<usize>,
     rx_corruption: Option<(u32, u8)>,
@@ -38,6 +39,7 @@ impl Runner {
         address: u32,
         bytes: &mut [u8],
     ) -> Result<(), ()> {
+        self.reads.push((address, bytes.len()));
         bytes.copy_from_slice(&self.bytes(address, bytes.len()));
         Ok(())
     }
@@ -149,6 +151,7 @@ fn ready<F: Future>(future: F) -> F::Output {
 fn setup() -> Runner {
     let mut runner = Runner {
         memory: BTreeMap::new(),
+        reads: Vec::new(),
         writes: 0,
         fail_write: None,
         rx_corruption: None,
@@ -315,7 +318,10 @@ fn rx_hop_selects_2048_byte_image_and_matching_allocator() {
     let mut installed = ready(runtime::install_rx_hop_diagnostic(&mut runner)).unwrap();
     let image = rx_hop::IMAGE;
     assert_eq!(runner.bytes(ALLOCATION, 256), image[..256]);
-    assert_eq!(runner.bytes(ALLOCATION + 300, image.len() - 300), image[300..]);
+    assert_eq!(
+        runner.bytes(ALLOCATION + 300, image.len() - 300),
+        image[300..]
+    );
     assert_eq!(runner.word(0x200564), ALLOCATION + 2048);
     assert_eq!(runner.word(TRANSPORT), ALLOCATION + 577);
     assert_eq!(runner.word(0x203a80), ALLOCATION + 256);
@@ -323,4 +329,52 @@ fn rx_hop_selects_2048_byte_image_and_matching_allocator() {
     ready(installed.restore(&mut runner)).unwrap();
     assert_eq!(runner.word(TRANSPORT), 0x44105);
     assert_eq!(runner.word(0x203a80), 0x8b634);
+}
+
+#[test]
+fn rx_timer_hop_installs_distinct_image_and_decodes_its_trace() {
+    let mut runner = setup();
+    let installed = ready(runtime::install_rx_timer_hop_diagnostic(&mut runner)).unwrap();
+    let image = rx_timer_hop::IMAGE;
+    assert_eq!(runner.bytes(ALLOCATION, 256), image[..256]);
+    assert_eq!(
+        runner.bytes(ALLOCATION + 300, image.len() - 300),
+        image[300..]
+    );
+    assert_eq!(runner.word(0x200564), ALLOCATION + 2048);
+    assert_eq!(runner.word(TRANSPORT), ALLOCATION + 577);
+    assert_eq!(runner.word(0x203a80), ALLOCATION + 256);
+
+    let trace_address = ALLOCATION + rx_timer_hop::offsets::HOP_TRACE;
+    for (index, value) in [0xffff, 36, 0x1020_3040, 17, 0x5060_7080, 0x90a0_b0c0]
+        .into_iter()
+        .enumerate()
+    {
+        runner.put(trace_address + index as u32 * 4, value);
+    }
+    let trace = ready(installed.read_timer_hop_trace(&mut runner)).unwrap();
+    assert_eq!(runner.reads.last(), Some(&(trace_address, 24)));
+    assert_eq!(
+        trace,
+        runtime::TimerHopTrace {
+            event_counter: 0xffff,
+            current_channel: 36,
+            config_count: 0x1020_3040,
+            ticks_remaining: 17,
+            accepted_callbacks: 0x5060_7080,
+            completed_advances: 0x90a0_b0c0,
+        }
+    );
+}
+
+#[test]
+fn timer_hop_trace_rejects_other_receive_images_without_reading() {
+    let mut runner = setup();
+    let installed = ready(runtime::install_rx_hop_diagnostic(&mut runner)).unwrap();
+    let reads = runner.reads.len();
+    assert_eq!(
+        ready(installed.read_timer_hop_trace(&mut runner)),
+        Err(runtime::Error::Controller)
+    );
+    assert_eq!(runner.reads.len(), reads);
 }
