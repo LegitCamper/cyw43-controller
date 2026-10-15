@@ -222,8 +222,8 @@ pub mod rx_hop {
 /// sequence, because the stock countdown callback itself never arms the
 /// receiver in RX mode. The first valid diagnostic counter marker can align
 /// the event counter and nominal interval phase once; after that the
-/// controller advances every 32 callbacks. Retuning is skipped while the
-/// event is not current. Timing and RF boundaries still require live
+/// controller advances every 32 callbacks. A callback dispatched while the
+/// event is not current is counted and does nothing else. Timing and RF boundaries still require live
 /// validation, and this has no BIGInfo-derived anchor.
 #[cfg(feature = "rx-timer-hop")]
 pub mod rx_timer_hop {
@@ -269,7 +269,7 @@ pub mod rx_timer_hop {
         /// Stock-countdown wrapper.
         pub const COUNTDOWN: u32 = 1132;
         /// Stock RX arming sequence invoked after each timer retune.
-        pub const TIMER_REARM: u32 = 1250;
+        pub const TIMER_REARM: u32 = 1234;
         /// MMIO channel programming routine.
         pub const CHANNEL_CONFIG: u32 = 1280;
         /// Relocation-free CSA#2 routine.

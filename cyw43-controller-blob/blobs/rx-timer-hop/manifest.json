@@ -74,7 +74,7 @@
     "hop_initial": 1050,
     "hop_trace": 1100,
     "countdown": 1132,
-    "timer_rearm": 1250,
+    "timer_rearm": 1234,
     "channel_config": 1280,
     "csa2": 1408,
     "marker_acquire": 1536
@@ -94,7 +94,7 @@
   "files": {
     "native.bin": {
       "size": 2048,
-      "sha256": "7272b1bfa277c7c1ccd20a3381a1069a131b4e6a4f573434da4cd605b4630419"
+      "sha256": "651b509797ae3907976e295233b5ecc5473268df36990b29d084a0fc5951461b"
     },
     "allocator.bin": {
       "size": 112,
