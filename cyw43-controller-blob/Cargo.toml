@@ -1,0 +1,21 @@
+[package]
+name = "cyw43-controller-blob"
+version = "0.1.0"
+description = "Resident CYW43439 ISO controller patch images and their ABI manifests"
+categories = ["embedded", "no-std"]
+keywords = ["bluetooth", "cyw43", "iso", "firmware"]
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+include = ["src/**", "blobs/**", "build.rs", "README.md"]
+
+[features]
+default = []
+# One image per feature; enabling none still exposes the ABI constants.
+continuous = []
+rx = []
+rx-stream = []
+
+[lints]
+workspace = true

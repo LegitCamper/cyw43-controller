@@ -15,12 +15,18 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
+#[cfg(feature = "alloc")]
 extern crate alloc;
 
 pub mod bis;
+#[cfg(feature = "alloc")]
 pub mod broadcast;
+#[cfg(feature = "alloc")]
 pub mod broadcast_advertising;
 pub mod channel;
+#[cfg(feature = "alloc")]
 pub mod isoal;
+#[cfg(feature = "alloc")]
 pub mod isoal_framed;
+#[cfg(feature = "alloc")]
 pub mod ltv;

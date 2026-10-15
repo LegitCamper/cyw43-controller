@@ -1,0 +1,76 @@
+{
+  "abi_version": 1,
+  "controller": "CYW43439",
+  "firmware": "0065",
+  "diagnostic": "one_shot_fixed_channel_rx",
+  "runtime_install_required": true,
+  "rom_sha256": "d5e271f20c80293be3561bb63e92ce4f6ca563ecca8fffd81eba639de9354038",
+  "bootstrap_address": 855952,
+  "bootstrap_requires_zero_reservation": true,
+  "boot_firmware_sha256": "b3c0c99774135c32beea47af847838077a1f0b7a6be661a68ddcd3641362ad7d",
+  "allocation_bytes": 1024,
+  "handle": 66,
+  "sdu_octets": 26,
+  "transport": {
+    "direction": "controller_to_host",
+    "hci_packet_type": 5,
+    "hci_iso_data_load_octets": 30,
+    "packet_boundary_flag": 2,
+    "timestamp_flag": 0,
+    "packet_status_flag": 0,
+    "diagnostic_sequence": 0,
+    "maximum_deliveries": 1,
+    "host_poll_interval_ms": 250
+  },
+  "radio": {
+    "phy": "LE_1M",
+    "hci_test_channel": 1,
+    "frequency_mhz": 2404,
+    "logical_channel": 0,
+    "access_address": 1905180374,
+    "crc_init": 1192961,
+    "whitening": true,
+    "expected_raw_header": 436214272
+  },
+  "pointer_installation": {
+    "transport_context_pointer_address": 2105116,
+    "transport_callback_context_offset": 256,
+    "expected_transport_callback": 278789,
+    "radio_callback_table_pointer_address": 2112128,
+    "expected_radio_callback_table": 570932,
+    "phase_table_slot": 4,
+    "rx_table_slot": 6
+  },
+  "resident_offsets": {
+    "rx_complete": 0,
+    "callback_table": 256,
+    "guard_before": 316,
+    "snapshot": 320,
+    "payload": 368,
+    "guard_after": 400,
+    "phase": 416,
+    "transport": 576,
+    "task_state": 736,
+    "phase_trace": 768,
+    "emitter": 800
+  },
+  "limitations": [
+    "fixed_channel_no_BIG_synchronization_or_hopping",
+    "one_snapshot_not_streaming",
+    "first_bit2_packet_claims_snapshot_even_if_unsupported",
+    "poll_assisted_task_wake",
+    "no_standard_BIG_creation_CIS_or_encryption",
+    "exclusive_stock_DTM_event_no_radio_coexistence",
+    "reset_only_resident_reclamation"
+  ],
+  "files": {
+    "native.bin": {
+      "size": 1024,
+      "sha256": "8dfcf7eee1ad5b54aec1022794f183442f146a58ad56359890ecdcf66b13f610"
+    },
+    "allocator.bin": {
+      "size": 112,
+      "sha256": "4217cca9174a3d829861c58dab5343f9642f41d1b84e1494ebe526f51bfb8a58"
+    }
+  }
+}

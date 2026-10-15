@@ -1,0 +1,83 @@
+{
+  "abi_version": 1,
+  "controller": "CYW43439",
+  "firmware": "0065",
+  "rom_sha256": "d5e271f20c80293be3561bb63e92ce4f6ca563ecca8fffd81eba639de9354038",
+  "continuous_discovery": true,
+  "handle": 66,
+  "sample_rate_hz": 8000,
+  "frame_duration_us": 10000,
+  "sdu_octets": 26,
+  "iso_credits": 4,
+  "runtime_install_required": true,
+  "bootstrap_address": 855952,
+  "bootstrap_requires_zero_reservation": true,
+  "boot_firmware_sha256": "b3c0c99774135c32beea47af847838077a1f0b7a6be661a68ddcd3641362ad7d",
+  "transport": {
+    "direction": "host_to_controller",
+    "hci_packet_type": 5,
+    "hci_iso_data_load_octets": 30,
+    "packet_boundary_flag": 2,
+    "timestamp_flag": 0,
+    "packet_status_flag": 0,
+    "unsupported_iso_behavior": "blocks_transport_ring_head",
+    "credit_completion": "radio_completion_not_queue_acceptance"
+  },
+  "radio": {
+    "bis_count": 1,
+    "iso_interval_us": 10000,
+    "phy": "LE_1M",
+    "framed": false,
+    "encrypted": false,
+    "bn": 1,
+    "nse": 1,
+    "irc": 1,
+    "pto": 0,
+    "channel_map_hex": "ffffffff1f"
+  },
+  "limitations": [
+    "exclusive_stock_DTM_event_no_radio_coexistence",
+    "no_standard_BIG_creation_or_CIS",
+    "fixed_handle_and_SDU_format",
+    "reset_only_resident_reclamation"
+  ],
+  "pointer_installation": {
+    "code_pointer_thumb_bit": 1,
+    "allocation_base_u32_offset": 2056,
+    "credit_emitter_pointer_u32_offset": 2088,
+    "reported_completions_u32_offset": 2092,
+    "transport_context_pointer_address": 2105116,
+    "transport_callback_context_offset": 256,
+    "expected_transport_callback": 278789,
+    "command_lookup_pointer_address": 2112052,
+    "expected_command_lookup": 852829,
+    "radio_callback_table_pointer_address": 2112128,
+    "expected_radio_callback_table": 570932
+  },
+  "resident_offsets": {
+    "phase": 0,
+    "tx_complete": 128,
+    "callback_table": 224,
+    "queue": 1792,
+    "queue_slots": 1824,
+    "transport": 2048,
+    "transport_state": 2056,
+    "credit_lookup": 3072,
+    "credit_emitter": 3160,
+    "radio_consumer": 3328
+  },
+  "files": {
+    "native.bin": {
+      "size": 4096,
+      "sha256": "be1197f5d05de61a28ba9bebb681882076c749f977931cbbebd35e87cdd92923"
+    },
+    "allocator.bin": {
+      "size": 112,
+      "sha256": "59d2135189219b28fb276ffe74baeca3b68c06b0639fc7a168092f97fc2071e1"
+    },
+    "audio.lc3": {
+      "size": 520,
+      "sha256": "0cfbf4821639945e4bdc6e296dd16c54d305fa99bc215ddb92382b1a3d0b78fc"
+    }
+  }
+}

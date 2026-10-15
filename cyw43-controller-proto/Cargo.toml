@@ -10,8 +10,11 @@ repository.workspace = true
 rust-version.workspace = true
 
 [features]
-default = []
-std = []
+default = ["alloc"]
+# Modules that build owned PDUs need an allocator; `channel`, `bis` and the
+# ISOAL recombiners do not, so allocation-free consumers can switch this off.
+alloc = []
+std = ["alloc"]
 
 [lints]
 workspace = true
