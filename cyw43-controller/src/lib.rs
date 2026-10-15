@@ -160,23 +160,25 @@ pub struct InstalledRxDiagnostic {
     mode: Mode,
 }
 
-/// Snapshot of the timer-driven hopping image's seven-word diagnostic trace.
+/// Snapshot of the timer-driven hopping image's eight-word diagnostic trace.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct TimerHopTrace {
     /// Current 16-bit CSA#2 event counter, stored in a controller word.
     pub event_counter: u32,
     /// Logical data channel most recently programmed.
     pub current_channel: u32,
-    /// Number of channel configurations, including event zero and acquisition.
+    /// All channel configurations: event zero, scans, acquisition and advances.
     pub config_count: u32,
     /// Accepted countdown callbacks remaining before the next advance.
     pub ticks_remaining: u32,
     /// Number of countdown callbacks accepted by the wrapper guards.
     pub accepted_callbacks: u32,
-    /// Number of timer-driven event advances completed after event zero.
+    /// Number of synchronized 32-callback event advances after acquisition.
     pub completed_advances: u32,
     /// One after the first valid diagnostic counter marker acquires the phase.
     pub marker_acquired: u32,
+    /// Channel retunes completed while scanning before marker acquisition.
+    pub preacquisition_scan_retunes: u32,
 }
 
 impl InstalledRxDiagnostic {
@@ -240,7 +242,7 @@ impl InstalledRxDiagnostic {
         if self.mode != Mode::RxTimerHop {
             return Err(Error::Controller);
         }
-        let mut bytes = [0; 28];
+        let mut bytes = [0; 32];
         runner
             .read(
                 self.allocation + blob::rx_timer_hop::offsets::HOP_TRACE,
@@ -256,6 +258,7 @@ impl InstalledRxDiagnostic {
             accepted_callbacks: trace_word(&bytes, 16),
             completed_advances: trace_word(&bytes, 20),
             marker_acquired: trace_word(&bytes, 24),
+            preacquisition_scan_retunes: trace_word(&bytes, 28),
         })
     }
 
@@ -308,10 +311,11 @@ pub async fn install_rx_hop_diagnostic<R: Runtime>(
 
 /// Install continuous timer-driven CSA#2 hopping RX.
 ///
-/// Event zero has no BIGInfo-derived anchor. The first valid diagnostic counter
-/// marker can align the event counter and nominal interval phase once. The
-/// image then advances every 32 stock DTM countdown callbacks independently of
-/// receive completion; cadence and RF retune boundary still require live validation.
+/// Event zero has no BIGInfo-derived anchor. Before marker acquisition, every
+/// accepted stock DTM countdown callback scans the next CSA#2 event candidate.
+/// The first valid diagnostic counter marker can align the event counter and
+/// nominal interval phase once. The image then advances every 32 callbacks;
+/// cadence and RF retune boundaries still require live validation.
 pub async fn install_rx_timer_hop_diagnostic<R: Runtime>(
     runner: &mut R,
 ) -> Result<InstalledRxDiagnostic, Error> {
@@ -392,7 +396,7 @@ impl Mode {
     }
 }
 
-fn trace_word(bytes: &[u8; 28], offset: usize) -> u32 {
+fn trace_word(bytes: &[u8; 32], offset: usize) -> u32 {
     u32::from_le_bytes([
         bytes[offset],
         bytes[offset + 1],

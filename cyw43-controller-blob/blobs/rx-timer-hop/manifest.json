@@ -2,7 +2,7 @@
   "abi_version": 1,
   "controller": "CYW43439",
   "firmware": "0065",
-  "diagnostic": "marker_acquired_dtm_countdown_csa2_hopping_rx",
+  "diagnostic": "marker_scan_acquired_dtm_countdown_csa2_hopping_rx",
   "runtime_install_required": true,
   "rom_sha256": "d5e271f20c80293be3561bb63e92ce4f6ca563ecca8fffd81eba639de9354038",
   "bootstrap_address": 855952,
@@ -38,6 +38,7 @@
     "channel_map": "all_37_data_channels",
     "nominal_interval_us": 20000,
     "countdown_ticks_per_event": 32,
+    "preacquisition_scan": "one_csa2_event_candidate_per_accepted_countdown_callback",
     "acquisition": "first_crc_valid_counter_marker",
     "acquisition_index": "payload_bytes_0_1_little_endian_u16",
     "acquisition_suffix": "payload_bytes_2_25_equal_2_through_25"
@@ -69,7 +70,7 @@
     "isr_forward": 912,
     "hop_advance": 1024,
     "hop_initial": 1050,
-    "hop_trace": 1096,
+    "hop_trace": 1100,
     "countdown": 1132,
     "channel_config": 1280,
     "csa2": 1408,
@@ -79,6 +80,7 @@
     "counter_marker_fixture_acquisition_not_BIGInfo_synchronization",
     "first_valid_marker_only_no_reacquisition",
     "one_lossy_snapshot_mailbox",
+    "preacquisition_scan_is_diagnostic_not_standard_discovery",
     "625us_DTM_scheduler_tick_is_static_not_measured_for_this_image",
     "retune_boundary_not_live_validated",
     "no_RF_loss_accounting",
@@ -89,7 +91,7 @@
   "files": {
     "native.bin": {
       "size": 2048,
-      "sha256": "db0bb61072703378ce944975ab092c1b8ee34c1a3adf80e20aa9b46410bede82"
+      "sha256": "5657f8bad24d5987d67788d46d79173b35a8f0ffbf84c69b9be34edbf0d43090"
     },
     "allocator.bin": {
       "size": 112,
@@ -97,15 +99,16 @@
     }
   },
   "diagnostic_trace": {
-    "offset": 1096,
+    "offset": 1100,
     "u32_fields": [
       "event_counter",
       "current_channel",
       "channel_configuration_count",
       "ticks_remaining",
       "accepted_countdown_callbacks",
-      "completed_event_advances",
-      "marker_synchronized"
+      "synchronized_event_advances",
+      "marker_synchronized",
+      "preacquisition_scan_retunes"
     ]
   }
 }

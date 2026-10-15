@@ -19,7 +19,7 @@ not duplicated per image.
 | `rx` | `rx` | 1024 | One-shot fixed-channel receive, one SDU |
 | `rx-stream` | `rx-stream` | 1024 | Continuous fixed-channel receive through a rearmed single-slot mailbox |
 | `rx-hop` | `rx-hop` | 2048 | Open-loop CSA#2 receive, advanced by matching RX callbacks |
-| `rx-timer-hop` | `rx-timer-hop` | 2048 | Marker-acquired CSA#2 receive, advanced by stock DTM countdown callbacks |
+| `rx-timer-hop` | `rx-timer-hop` | 2048 | Fast pre-acquisition CSA#2 scan, then marker-aligned timer hopping |
 
 This crate installs nothing: installation order, verification and rollback
 belong to the host driver.
@@ -50,7 +50,9 @@ mono 8 kHz, 10 ms SDUs of 26 octets on handle `0x42`. The `rx-stream` mailbox is
 lossy by construction, a busy mailbox drops newer packets, and its sequence
 numbers count accepted SDUs rather than synchronised BIG events, so they support
 no loss accounting. Both hopping images lack a BIGInfo-derived anchor. The
-timer image's 20-ms cadence is nominal until measured on hardware.
+timer image scans one event candidate per accepted countdown callback before
+acquisition; its callback spacing and synchronized 20-ms cadence remain nominal
+until measured on hardware.
 
 Reverse-engineering experiment; not qualified, and not standard CIS/BIG
 negotiation.

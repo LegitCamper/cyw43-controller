@@ -18,5 +18,6 @@ error or cancelled future requires a chip restart and firmware reload.
 
 Receive diagnostics include fixed-channel streaming, receive-driven CSA#2 and
 timer-driven CSA#2. The timer image can acquire once from a diagnostic counter
-marker and exposes a read-only seven-word trace for live cadence validation; it
+marker, scans one CSA#2 event candidate per accepted countdown callback before
+acquisition, and exposes a read-only eight-word trace for live validation. It
 still has no BIGInfo-derived anchor.

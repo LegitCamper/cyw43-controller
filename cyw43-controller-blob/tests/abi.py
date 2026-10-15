@@ -167,6 +167,10 @@ check("rx_hop::radio::EVENT_COUNTER_INITIAL", constant("EVENT_COUNTER_INITIAL", 
       hop["radio"]["event_counter_initial"])
 
 timer_hop = manifest("rx-timer-hop")
+check("rx_timer_hop diagnostic", timer_hop["diagnostic"],
+      "marker_scan_acquired_dtm_countdown_csa2_hopping_rx")
+check("rx_timer_hop preacquisition scan", timer_hop["radio"]["preacquisition_scan"],
+      "one_csa2_event_candidate_per_accepted_countdown_callback")
 check("rx_timer_hop::pointers::COUNTDOWN_TABLE_SLOT",
       module_constant("rx_timer_hop", "COUNTDOWN_TABLE_SLOT", 10),
       timer_hop["pointer_installation"]["countdown_table_slot"])
@@ -189,7 +193,8 @@ check("rx_timer_hop diagnostic trace offset",
       module_constant("rx_timer_hop", "HOP_TRACE", 10), timer_hop["diagnostic_trace"]["offset"])
 check("rx_timer_hop diagnostic trace fields", timer_hop["diagnostic_trace"]["u32_fields"], [
     "event_counter", "current_channel", "channel_configuration_count", "ticks_remaining",
-    "accepted_countdown_callbacks", "completed_event_advances", "marker_synchronized"
+    "accepted_countdown_callbacks", "synchronized_event_advances", "marker_synchronized",
+    "preacquisition_scan_retunes"
 ])
 
 if failures:
