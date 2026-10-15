@@ -92,6 +92,32 @@ for name, key in (
 ):
     check(f"offsets::{name}", constant(name, 10), stream["resident_offsets"][key])
 
+# Each image's allocator must be the one built for its reservation size, so a
+# smaller reservation can never be installed under a larger image.
+allocators = {}
+for image in ("continuous", "rx", "rx-stream"):
+    allocators[image] = (ROOT / "blobs" / image / "allocator.bin").read_bytes()
+assert allocators["rx"] == allocators["rx-stream"], "equal reservations must share an allocator"
+if allocators["continuous"] == allocators["rx"]:
+    failures.append("continuous and rx allocators are identical despite differing reservations")
+for image, data in allocators.items():
+    if len(data) != 112:
+        failures.append(f"{image} allocator is {len(data)} bytes, expected 112")
+    expected = manifest(image)["files"]["allocator.bin"]["sha256"]
+    import hashlib
+
+    if hashlib.sha256(data).hexdigest() != expected:
+        failures.append(f"{image} allocator does not match its manifest")
+
+# Every image module must expose its own allocator rather than sharing one.
+for module in ("continuous", "rx", "rx_stream"):
+    pattern = rf"pub mod {module} \{{.*?ALLOCATOR: &\[u8; 112\] = include_bytes!\(\"\.\./blobs/([\w-]+)/allocator\.bin\"\)"
+    match = re.search(pattern, source, re.S)
+    if not match:
+        failures.append(f"{module} does not include its own allocator")
+    elif match[1].replace("-", "_") != module:
+        failures.append(f"{module} includes the {match[1]} allocator")
+
 # Allocation sizes are per image.
 for image, module in (("continuous", "continuous"), ("rx", "rx"), ("rx-stream", "rx_stream")):
     expected = manifest(image)["files"]["native.bin"]["size"]

@@ -45,10 +45,10 @@ pub const ABI_VERSION: u32 = 1;
 /// 112 zero bytes here, which [`BOOT_FIRMWARE_SHA256`] identifies.
 pub const BOOTSTRAP_ADDRESS: u32 = 0x000d_0f90;
 
-/// Guarded bootstrap that allocates resident SRAM through the controller's own
-/// arena allocator. Shared by every image; the reservation size differs per
-/// image and is patched by the installer.
-pub const ALLOCATOR: &[u8; 112] = include_bytes!("../blobs/rx-stream/allocator.bin");
+// The bootstrap's reservation size is baked into its instruction stream, so
+// each image ships the allocator built for its own allocation size. They are
+// not interchangeable: installing a smaller reservation under a larger image
+// would let the controller hand out memory the image already occupies.
 
 /// Controller pointers an installer must verify before publishing hooks.
 pub mod pointers {
@@ -83,6 +83,8 @@ pub mod transport {
 pub mod continuous {
     /// Resident image.
     pub const IMAGE: &[u8; 4096] = include_bytes!("../blobs/continuous/native.bin");
+    /// Guarded bootstrap built for this image's reservation size.
+    pub const ALLOCATOR: &[u8; 112] = include_bytes!("../blobs/continuous/allocator.bin");
     /// Bytes the installer must reserve.
     pub const ALLOCATION_BYTES: u32 = 4096;
 }
@@ -92,6 +94,8 @@ pub mod continuous {
 pub mod rx {
     /// Resident image.
     pub const IMAGE: &[u8; 1024] = include_bytes!("../blobs/rx/native.bin");
+    /// Guarded bootstrap built for this image's reservation size.
+    pub const ALLOCATOR: &[u8; 112] = include_bytes!("../blobs/rx/allocator.bin");
     /// Bytes the installer must reserve.
     pub const ALLOCATION_BYTES: u32 = 1024;
 }
@@ -105,6 +109,8 @@ pub mod rx {
 pub mod rx_stream {
     /// Resident image.
     pub const IMAGE: &[u8; 1024] = include_bytes!("../blobs/rx-stream/native.bin");
+    /// Guarded bootstrap built for this image's reservation size.
+    pub const ALLOCATOR: &[u8; 112] = include_bytes!("../blobs/rx-stream/allocator.bin");
     /// Bytes the installer must reserve.
     pub const ALLOCATION_BYTES: u32 = 1024;
 
