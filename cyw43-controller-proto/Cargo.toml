@@ -1,0 +1,17 @@
+[package]
+name = "cyw43-controller-proto"
+version = "0.1.0"
+description = "Link-layer and LE Audio byte formats for Bluetooth LE isochronous channels"
+categories = ["embedded", "no-std"]
+keywords = ["bluetooth", "le-audio", "iso", "bis"]
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[features]
+default = []
+std = []
+
+[lints]
+workspace = true
