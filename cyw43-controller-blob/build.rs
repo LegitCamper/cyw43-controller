@@ -1,8 +1,8 @@
-//! Verifies each shipped image against the SHA-256 in its own manifest.
+//! Verifies each shipped binary against the size and SHA-256 in its manifest.
 //!
-//! The images are generated and validated in the `cyw43_iso` repository; this
-//! crate only carries them. Re-checking at build time means a corrupted or
-//! hand-edited image fails the build instead of reaching a controller.
+//! The binaries are generated and validated in the `cyw43_iso` repository;
+//! this crate only carries them. Re-checking at build time means a corrupted
+//! or hand-edited binary fails the build instead of reaching a controller.
 
 use std::{fs, path::Path};
 
@@ -84,6 +84,35 @@ fn field<'a>(json: &'a str, name: &str) -> Option<&'a str> {
     Some(&rest[start..end])
 }
 
+/// Extracts one unsigned integer field from a flat JSON object.
+fn unsigned_field(json: &str, name: &str) -> Option<usize> {
+    let key = format!("\"{name}\"");
+    let rest = &json[json.find(&key)? + key.len()..];
+    let rest = rest[rest.find(':')? + 1..].trim_start();
+    let end = rest.find(|character: char| !character.is_ascii_digit())?;
+    rest[..end].parse().ok()
+}
+
+fn verify(directory: &Path, manifest: &str, name: &str, label: &str) {
+    let path = directory.join(name);
+    println!("cargo::rerun-if-changed={}", path.display());
+    let files = &manifest[manifest.find("\"files\"").expect("files")..];
+    let entry = &files[files.find(&format!("\"{name}\"")).expect(name)..];
+    let bytes = fs::read(&path).expect(name);
+    let expected_size = unsigned_field(entry, "size").expect("size");
+    let expected_hash = field(entry, "sha256").expect("sha256");
+    assert_eq!(
+        bytes.len(),
+        expected_size,
+        "{label}/{name} does not match its manifest size"
+    );
+    assert_eq!(
+        hash(&bytes),
+        expected_hash,
+        "{label}/{name} does not match its manifest SHA-256; regenerate it in cyw43_iso rather than editing it here"
+    );
+}
+
 fn main() {
     for image in ["continuous", "rx", "rx-stream", "rx-hop"] {
         let directory = Path::new("blobs").join(image);
@@ -91,20 +120,19 @@ fn main() {
         let manifest = fs::read_to_string(&manifest_path).expect("manifest");
         println!("cargo::rerun-if-changed={}", manifest_path.display());
 
-        // `files` maps each shipped file to its size and SHA-256.
-        let files = &manifest[manifest.find("\"files\"").expect("files")..];
         for name in ["native.bin", "allocator.bin"] {
-            let path = directory.join(name);
-            println!("cargo::rerun-if-changed={}", path.display());
-            let entry = &files[files.find(&format!("\"{name}\"")).expect(name)..];
-            let expected = field(entry, "sha256").expect("sha256");
-            let actual = hash(&fs::read(&path).expect(name));
-            assert_eq!(
-                actual,
-                expected,
-                "{image}/{name} does not match its manifest SHA-256; \
-                 regenerate it in cyw43_iso rather than editing it here"
-            );
+            verify(&directory, &manifest, name, image);
         }
     }
+
+    let directory = Path::new("firmware");
+    let manifest_path = directory.join("manifest.json");
+    let manifest = fs::read_to_string(&manifest_path).expect("firmware manifest");
+    println!("cargo::rerun-if-changed={}", manifest_path.display());
+    verify(
+        directory,
+        &manifest,
+        "43439A2-0065-reserved.bin",
+        "firmware",
+    );
 }

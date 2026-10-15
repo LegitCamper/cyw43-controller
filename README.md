@@ -14,7 +14,7 @@ implementation and not standard CIS/BIG negotiation.
 | Crate | Role |
 | --- | --- |
 | [`cyw43-controller`](cyw43-controller) | Safe startup installer and lifecycle state machine. Bus-driver independent, analogous to `nrf-sdc`. |
-| [`cyw43-controller-blob`](cyw43-controller-blob) | Resident patch bytes plus build-time ABI digest verification, analogous to `nrf-sdc-sys`. |
+| [`cyw43-controller-blob`](cyw43-controller-blob) | Shared reserved boot firmware, resident patch bytes and build-time size/digest verification, analogous to `nrf-sdc-sys`. |
 | [`cyw43-controller-proto`](cyw43-controller-proto) | Controller/link-layer byte formats: CSA#2, BIS, BIG advertising, ISOAL and LTV. No host stack. |
 
 `cyw43_iso` remains the reverse-engineering and blob-generation project.

@@ -1,12 +1,17 @@
 # cyw43-controller-blob
 
-Resident CYW43439 ISO controller patch images and their ABI, in the role
-`nrf-sdc-sys` plays for Nordic parts.
+Resident CYW43439 ISO controller patch images, matching boot firmware and their
+ABI, in the role `nrf-sdc-sys` plays for Nordic parts.
 
 The stock `.0065` Bluetooth firmware reports no ISO support. These images are
 installed into controller SRAM at startup so the controller answers ordinary
 HCI ISO. They are generated and validated in `cyw43_iso`; this crate only
 carries the bytes and the addresses an installer needs.
+
+`BOOT_FIRMWARE` is the tested `.0065` HCD container with one 112-byte zeroed
+record at `0x000d0f90`. Load it instead of a separate stock `btfw` before
+installing any image. All resident images share this one boot firmware; it is
+not duplicated per image.
 
 | Feature | Image | Size | Behaviour |
 | --- | --- | --- | --- |
@@ -19,10 +24,10 @@ belong to the host driver.
 
 ## Integrity
 
-`build.rs` re-hashes every shipped image against the SHA-256 in its own
-generated manifest, so a corrupted or hand-edited image fails the build instead
-of reaching a controller. Regenerate images in `cyw43_iso` rather than editing
-them here.
+`build.rs` checks every shipped image and the boot firmware against the byte
+size and SHA-256 in their manifests, so a corrupted or hand-edited binary fails
+the build instead of reaching a controller. Regenerate them in `cyw43_iso`
+rather than editing them here.
 
 `tests/abi.py` checks the hand-written constants in `src/lib.rs` against the
 generated manifests, rejecting drift in identity, bootstrap address, controller
@@ -46,3 +51,12 @@ no loss accounting.
 
 Reverse-engineering experiment; not qualified, and not standard CIS/BIG
 negotiation.
+
+## Binary licensing
+
+Rust source remains `MIT OR Apache-2.0`. The boot firmware derives from Pico
+SDK's `lib/cyw43-driver/firmware/cyw43_btfw_43439.h` and is separately covered
+by `licenses/LICENSE` and `licenses/LICENSE.RP`. The RP license permits modified
+redistribution only with Raspberry Pi semiconductor devices; the other license
+limits use to personal, non-commercial purposes. Do not treat the firmware as
+MIT or Apache licensed.

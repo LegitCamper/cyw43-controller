@@ -8,7 +8,7 @@ edition.workspace = true
 license.workspace = true
 repository.workspace = true
 rust-version.workspace = true
-include = ["src/**", "blobs/**", "build.rs", "README.md"]
+include = ["src/**", "blobs/**", "firmware/**", "licenses/**", "tests/**", "build.rs", "README.md"]
 
 [features]
 default = []
