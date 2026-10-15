@@ -1,0 +1,21 @@
+{
+  "controller": "CYW43439",
+  "firmware": "0065",
+  "licenses": ["licenses/LICENSE", "licenses/LICENSE.RP"],
+  "source": {
+    "pico_sdk_path": "lib/cyw43-driver/firmware/cyw43_btfw_43439.h",
+    "container_size": 6970,
+    "container_sha256": "d974384d0aa8124d30084f30d13519a3ed3b9f759f7ddd6a34ef3dcf1441bcf7"
+  },
+  "reservation": {
+    "address": 855952,
+    "size": 112,
+    "contents": "zero"
+  },
+  "files": {
+    "43439A2-0065-reserved.bin": {
+      "size": 7092,
+      "sha256": "b3c0c99774135c32beea47af847838077a1f0b7a6be661a68ddcd3641362ad7d"
+    }
+  }
+}

@@ -16,6 +16,8 @@
 
 use cyw43_controller_blob as blob;
 
+pub use cyw43_controller_blob::{BOOT_FIRMWARE, BOOT_FIRMWARE_SHA256};
+
 /// Exclusive startup access to a CYW43439 controller, implemented by whichever
 /// host driver owns the bus.
 ///

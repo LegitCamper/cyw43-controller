@@ -7,8 +7,9 @@
 //! plays for Nordic parts.
 //!
 //! This crate installs nothing. It exposes the image bytes, the bootstrap
-//! allocator, and the addresses and offsets an installer needs. Installation
-//! order, verification and rollback belong to the host driver.
+//! allocator, the matching boot firmware, and the addresses and offsets an
+//! installer needs. Installation order, verification and rollback belong to
+//! the host driver.
 //!
 //! # Constraints
 //!
@@ -37,6 +38,12 @@ pub const ROM_SHA256: &str = "d5e271f20c80293be3561bb63e92ce4f6ca563ecca8fffd81e
 /// SHA-256 of the boot firmware that reserves the bootstrap's zero bytes.
 pub const BOOT_FIRMWARE_SHA256: &str =
     "b3c0c99774135c32beea47af847838077a1f0b7a6be661a68ddcd3641362ad7d";
+
+/// Tested `.0065` HCD container with the bootstrap's SRAM reservation.
+///
+/// Load this instead of the stock Pico SDK Bluetooth firmware before using
+/// any resident image from this crate. It is shared by every image.
+pub const BOOT_FIRMWARE: &[u8; 7092] = include_bytes!("../firmware/43439A2-0065-reserved.bin");
 
 /// Manifest ABI version shared by every image here.
 pub const ABI_VERSION: u32 = 1;

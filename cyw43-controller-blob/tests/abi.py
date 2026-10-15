@@ -31,6 +31,8 @@ def module_constant(module, name, radix=0):
 def manifest(image):
     return json.loads((ROOT / "blobs" / image / "manifest.json").read_text())
 
+firmware = json.loads((ROOT / "firmware/manifest.json").read_text())
+
 
 failures = []
 
@@ -51,10 +53,26 @@ check("BOOTSTRAP_ADDRESS", constant("BOOTSTRAP_ADDRESS", 16), stream["bootstrap_
 # Every image must agree on the shared identity and bootstrap.
 for image in ("continuous", "rx", "rx-stream", "rx-hop", "rx-timer-hop"):
     other = manifest(image)
-    for key in ("controller", "firmware", "rom_sha256", "abi_version", "bootstrap_address"):
+    for key in ("controller", "firmware", "rom_sha256", "boot_firmware_sha256",
+                "abi_version", "bootstrap_address"):
         check(f"{image}.{key}", other[key], stream[key])
     assert other["runtime_install_required"], image
     assert other["bootstrap_requires_zero_reservation"], image
+
+boot = ROOT / "firmware/43439A2-0065-reserved.bin"
+boot_entry = firmware["files"][boot.name]
+boot_bytes = boot.read_bytes()
+check("firmware.controller", firmware["controller"], stream["controller"])
+check("firmware.firmware", firmware["firmware"], stream["firmware"])
+check("firmware.reservation.address", firmware["reservation"]["address"],
+      stream["bootstrap_address"])
+check("firmware.reservation.size", firmware["reservation"]["size"], 112)
+check("BOOT_FIRMWARE size", len(boot_bytes), boot_entry["size"])
+check("BOOT_FIRMWARE SHA-256", hashlib.sha256(boot_bytes).hexdigest(),
+      stream["boot_firmware_sha256"])
+if not re.search(r'pub const BOOT_FIRMWARE: &\[u8; 7092\] =\s*include_bytes!\('
+                 r'"\.\./firmware/43439A2-0065-reserved\.bin"\);', source):
+    failures.append("BOOT_FIRMWARE does not expose the verified firmware file")
 
 pointers = stream["pointer_installation"]
 for name, key in (
