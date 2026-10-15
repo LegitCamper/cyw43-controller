@@ -1,0 +1,16 @@
+[package]
+name = "cyw43-controller"
+version = "0.1.0"
+description = "Resident-patch installer presenting Bluetooth LE isochronous channels on the CYW43439"
+categories = ["embedded", "no-std", "hardware-support"]
+keywords = ["bluetooth", "le-audio", "iso", "cyw43", "bis"]
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+cyw43-controller-blob = { version = "0.1", path = "../cyw43-controller-blob", features = ["continuous", "rx", "rx-stream"] }
+
+[lints]
+workspace = true

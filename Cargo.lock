@@ -3,6 +3,13 @@
 version = 4
 
 [[package]]
+name = "cyw43-controller"
+version = "0.1.0"
+dependencies = [
+ "cyw43-controller-blob",
+]
+
+[[package]]
 name = "cyw43-controller-blob"
 version = "0.1.0"
 

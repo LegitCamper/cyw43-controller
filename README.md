@@ -13,14 +13,14 @@ implementation and not standard CIS/BIG negotiation.
 
 | Crate | Role |
 | --- | --- |
-| [`cyw43-controller-proto`](cyw43-controller-proto) | Link-layer and LE Audio byte formats. No host stack, no radio. |
+| [`cyw43-controller`](cyw43-controller) | Safe startup installer and lifecycle state machine. Bus-driver independent, analogous to `nrf-sdc`. |
+| [`cyw43-controller-blob`](cyw43-controller-blob) | Resident patch bytes plus build-time ABI digest verification, analogous to `nrf-sdc-sys`. |
+| [`cyw43-controller-proto`](cyw43-controller-proto) | Controller/link-layer byte formats: CSA#2, BIS, BIG advertising, ISOAL and LTV. No host stack. |
 
-Planned, mirroring `nrf-sdc`'s split:
-
-- `cyw43-controller-blob`: the resident patch bytes and their ABI manifest,
-  generated and validated in `cyw43_iso`, analogous to `nrf-sdc-sys`.
-- `cyw43-controller`: the host driver that installs a blob, owns the HCI
-  transport, and presents ISO, analogous to `nrf-sdc`.
+`cyw43_iso` remains the reverse-engineering and blob-generation project.
+Embassy or another bus owner implements `cyw43_controller::Runtime` with four
+exclusive-startup operations; controller policy and patch lifecycle do not
+live in that host driver.
 
 Consumers are expected to be `trouble_audio` for LE Audio profiles,
 `rp2040_audio` for Pico W applications, and the independent nRF54L15 test
@@ -30,8 +30,9 @@ firmware that validates the radio.
 
 `proto` encodes, decodes and derives. It does not establish a CIS or BIG,
 schedule radio events, assign sequence numbers, or recover synchronisation
-references; those belong to whatever owns the radio. Encoding a value is never
-evidence of a corresponding on-air event.
+references; those belong to controller implementation. Encoding a value is
+never evidence of a corresponding on-air event.
 
-Builds on `thumbv6m-none-eabi` and `thumbv8m.main-none-eabihf` as well as the
-host. `no_std` + `alloc` by default, `unsafe_code = "forbid"`.
+All crates forbid unsafe code and build on `thumbv6m-none-eabi`,
+`thumbv8m.main-none-eabihf` and host. `proto` is `no_std` with safe `alloc` by
+default; allocator-free users can disable its default feature.

@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["cyw43-controller-proto", "cyw43-controller-blob"]
+members = ["cyw43-controller", "cyw43-controller-proto", "cyw43-controller-blob"]
 
 [workspace.package]
 edition = "2024"
