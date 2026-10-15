@@ -163,3 +163,47 @@ pub mod rx_stream {
     /// Guard word written on both sides of the snapshot record.
     pub const GUARD_WORD: u32 = 0x5258_5331;
 }
+
+/// Open-loop CSA#2 receive using the stream mailbox.
+///
+/// Event zero starts on its CSA#2 channel. Each matching stock RX callback,
+/// including CRC failures, advances the 16-bit event counter once and retunes
+/// after the stock callback rearms the radio. This has no BIGInfo-derived
+/// anchor yet: starting on the wrong event stays wrong.
+#[cfg(feature = "rx-hop")]
+pub mod rx_hop {
+    /// Resident image.
+    pub const IMAGE: &[u8; 2048] = include_bytes!("../blobs/rx-hop/native.bin");
+    /// Guarded bootstrap built for this image's reservation size.
+    pub const ALLOCATOR: &[u8; 112] = include_bytes!("../blobs/rx-hop/allocator.bin");
+    /// Bytes the installer must reserve.
+    pub const ALLOCATION_BYTES: u32 = 2048;
+
+    /// Fixed identity and channel-selection parameters.
+    pub mod radio {
+        /// BIS access address.
+        pub const ACCESS_ADDRESS: u32 = 0x718e_bed6;
+        /// BIS CRC initialiser.
+        pub const CRC_INIT: u32 = 0x0012_3401;
+        /// CSA#2 channel identifier derived from the access address.
+        pub const CHANNEL_ID: u16 = 0xcf58;
+        /// Initial open-loop event counter.
+        pub const EVENT_COUNTER_INITIAL: u16 = 0;
+        /// Raw controller header an accepted packet must present.
+        pub const EXPECTED_RAW_HEADER: u32 = 0x1a00_1a00;
+    }
+
+    /// Additional offsets beyond the shared 1024-byte RX stream image.
+    pub mod offsets {
+        /// Post-stock event-counter advance and retune.
+        pub const HOP_ADVANCE: u32 = 1024;
+        /// Event-zero channel setup called by the phase hook.
+        pub const HOP_INITIAL: u32 = 1050;
+        /// Current event counter, logical channel and configure count.
+        pub const HOP_TRACE: u32 = 1072;
+        /// MMIO channel programming routine.
+        pub const CHANNEL_CONFIG: u32 = 1152;
+        /// Relocation-free CSA#2 routine.
+        pub const CSA2: u32 = 1280;
+    }
+}

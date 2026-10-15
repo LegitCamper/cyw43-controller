@@ -16,6 +16,7 @@ default = []
 continuous = []
 rx = []
 rx-stream = []
+rx-hop = []
 
 [lints]
 workspace = true

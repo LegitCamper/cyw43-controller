@@ -1,7 +1,7 @@
 //! Installer state-machine checks against an in-memory CYW43439.
 
 use cyw43_controller as runtime;
-use cyw43_controller_blob::rx_stream;
+use cyw43_controller_blob::{rx_hop, rx_stream};
 use std::{
     collections::BTreeMap,
     future::Future,
@@ -62,6 +62,7 @@ impl Runner {
                 if self.word(0x203a34) == 0xd0f91 && self.word(0xd0ff0) == 0 {
                     let size = match self.bytes(0xd0fc8, 2).as_slice() {
                         [0x80, 0x50] => 4096,
+                        [0x00, 0x60] => 2048,
                         [0x80, 0x60] => 1024,
                         _ => panic!("unexpected allocator size"),
                     };
@@ -302,6 +303,22 @@ fn rx_stream_selects_separate_blob_and_preserves_same_lifecycle() {
     assert_eq!(runner.bytes(ALLOCATION + 300, 724), image[300..]);
     assert_eq!(runner.word(0x200564), ALLOCATION + 1024);
     assert_eq!(runner.word(TRANSPORT), ALLOCATION + 577);
+    ready(installed.start(&mut runner)).unwrap();
+    ready(installed.restore(&mut runner)).unwrap();
+    assert_eq!(runner.word(TRANSPORT), 0x44105);
+    assert_eq!(runner.word(0x203a80), 0x8b634);
+}
+
+#[test]
+fn rx_hop_selects_2048_byte_image_and_matching_allocator() {
+    let mut runner = setup();
+    let mut installed = ready(runtime::install_rx_hop_diagnostic(&mut runner)).unwrap();
+    let image = rx_hop::IMAGE;
+    assert_eq!(runner.bytes(ALLOCATION, 256), image[..256]);
+    assert_eq!(runner.bytes(ALLOCATION + 300, image.len() - 300), image[300..]);
+    assert_eq!(runner.word(0x200564), ALLOCATION + 2048);
+    assert_eq!(runner.word(TRANSPORT), ALLOCATION + 577);
+    assert_eq!(runner.word(0x203a80), ALLOCATION + 256);
     ready(installed.start(&mut runner)).unwrap();
     ready(installed.restore(&mut runner)).unwrap();
     assert_eq!(runner.word(TRANSPORT), 0x44105);

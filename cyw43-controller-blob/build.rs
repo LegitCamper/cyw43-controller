@@ -85,7 +85,7 @@ fn field<'a>(json: &'a str, name: &str) -> Option<&'a str> {
 }
 
 fn main() {
-    for image in ["continuous", "rx", "rx-stream"] {
+    for image in ["continuous", "rx", "rx-stream", "rx-hop"] {
         let directory = Path::new("blobs").join(image);
         let manifest_path = directory.join("manifest.json");
         let manifest = fs::read_to_string(&manifest_path).expect("manifest");

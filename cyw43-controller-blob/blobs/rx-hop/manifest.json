@@ -1,0 +1,88 @@
+{
+  "abi_version": 1,
+  "controller": "CYW43439",
+  "firmware": "0065",
+  "diagnostic": "open_loop_csa2_hopping_rx",
+  "runtime_install_required": true,
+  "rom_sha256": "d5e271f20c80293be3561bb63e92ce4f6ca563ecca8fffd81eba639de9354038",
+  "bootstrap_address": 855952,
+  "bootstrap_requires_zero_reservation": true,
+  "boot_firmware_sha256": "b3c0c99774135c32beea47af847838077a1f0b7a6be661a68ddcd3641362ad7d",
+  "allocation_bytes": 2048,
+  "handle": 66,
+  "sdu_octets": 26,
+  "transport": {
+    "direction": "controller_to_host",
+    "hci_packet_type": 5,
+    "hci_iso_data_load_octets": 30,
+    "packet_boundary_flag": 2,
+    "timestamp_flag": 0,
+    "packet_status_flag": 0,
+    "diagnostic_sequence": "accepted_sdu_counter_low16",
+    "maximum_deliveries": null,
+    "host_poll_interval_ms": 0,
+    "task_wake": "radio_callback_event_or_0x9061"
+  },
+  "radio": {
+    "phy": "LE_1M",
+    "hci_test_channel": null,
+    "frequency_mhz": null,
+    "logical_channel": null,
+    "access_address": 1905180374,
+    "crc_init": 1192961,
+    "whitening": true,
+    "expected_raw_header": 436214272,
+    "channel_selection_algorithm": 2,
+    "channel_id": 53080,
+    "event_counter_initial": 0,
+    "channel_map": "all_37_data_channels"
+  },
+  "pointer_installation": {
+    "transport_context_pointer_address": 2105116,
+    "transport_callback_context_offset": 256,
+    "expected_transport_callback": 278789,
+    "radio_callback_table_pointer_address": 2112128,
+    "expected_radio_callback_table": 570932,
+    "phase_table_slot": 4,
+    "rx_table_slot": 6
+  },
+  "resident_offsets": {
+    "rx_complete": 0,
+    "callback_table": 256,
+    "guard_before": 316,
+    "snapshot": 320,
+    "payload": 368,
+    "guard_after": 400,
+    "phase": 416,
+    "transport": 576,
+    "task_state": 736,
+    "phase_trace": 768,
+    "emitter": 800,
+    "rejected_snapshots": 744,
+    "isr_forward": 912,
+    "hop_advance": 1024,
+    "hop_initial": 1050,
+    "hop_trace": 1072,
+    "channel_config": 1152,
+    "csa2": 1280
+  },
+  "limitations": [
+    "open_loop_counter_without_BIGInfo_anchor",
+    "one_lossy_snapshot_mailbox",
+    "counter_advances_once_per_stock_RX_callback",
+    "no_RF_loss_accounting",
+    "no_standard_BIG_creation_CIS_or_encryption",
+    "exclusive_stock_DTM_event_no_radio_coexistence",
+    "reset_only_resident_reclamation"
+  ],
+  "files": {
+    "native.bin": {
+      "size": 2048,
+      "sha256": "18d2465e09e8b158ad73781ede07c2991dd62e2e7823770d83cd446292e6fbf1"
+    },
+    "allocator.bin": {
+      "size": 112,
+      "sha256": "dc1c2dfabb13f4a8de26ab8328de4def56944d2d646bbe65cf201295bdbc4d47"
+    }
+  }
+}

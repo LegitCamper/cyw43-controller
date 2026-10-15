@@ -41,7 +41,7 @@ check("ABI_VERSION", constant("ABI_VERSION", 10), stream["abi_version"])
 check("BOOTSTRAP_ADDRESS", constant("BOOTSTRAP_ADDRESS", 16), stream["bootstrap_address"])
 
 # Every image must agree on the shared identity and bootstrap.
-for image in ("continuous", "rx", "rx-stream"):
+for image in ("continuous", "rx", "rx-stream", "rx-hop"):
     other = manifest(image)
     for key in ("controller", "firmware", "rom_sha256", "abi_version", "bootstrap_address"):
         check(f"{image}.{key}", other[key], stream[key])
@@ -95,11 +95,13 @@ for name, key in (
 # Each image's allocator must be the one built for its reservation size, so a
 # smaller reservation can never be installed under a larger image.
 allocators = {}
-for image in ("continuous", "rx", "rx-stream"):
+for image in ("continuous", "rx", "rx-stream", "rx-hop"):
     allocators[image] = (ROOT / "blobs" / image / "allocator.bin").read_bytes()
 assert allocators["rx"] == allocators["rx-stream"], "equal reservations must share an allocator"
 if allocators["continuous"] == allocators["rx"]:
     failures.append("continuous and rx allocators are identical despite differing reservations")
+if allocators["rx-hop"] in (allocators["continuous"], allocators["rx"]):
+    failures.append("rx-hop allocator is identical to a different reservation size")
 for image, data in allocators.items():
     if len(data) != 112:
         failures.append(f"{image} allocator is {len(data)} bytes, expected 112")
@@ -110,7 +112,7 @@ for image, data in allocators.items():
         failures.append(f"{image} allocator does not match its manifest")
 
 # Every image module must expose its own allocator rather than sharing one.
-for module in ("continuous", "rx", "rx_stream"):
+for module in ("continuous", "rx", "rx_stream", "rx_hop"):
     pattern = rf"pub mod {module} \{{.*?ALLOCATOR: &\[u8; 112\] = include_bytes!\(\"\.\./blobs/([\w-]+)/allocator\.bin\"\)"
     match = re.search(pattern, source, re.S)
     if not match:
@@ -119,7 +121,8 @@ for module in ("continuous", "rx", "rx_stream"):
         failures.append(f"{module} includes the {match[1]} allocator")
 
 # Allocation sizes are per image.
-for image, module in (("continuous", "continuous"), ("rx", "rx"), ("rx-stream", "rx_stream")):
+for image, module in (("continuous", "continuous"), ("rx", "rx"),
+                      ("rx-stream", "rx_stream"), ("rx-hop", "rx_hop")):
     expected = manifest(image)["files"]["native.bin"]["size"]
     match = re.search(
         rf"pub mod {module} \{{.*?pub const ALLOCATION_BYTES: u32 = (\d+);", source, re.S
@@ -130,7 +133,16 @@ for image, module in (("continuous", "continuous"), ("rx", "rx"), ("rx-stream", 
 if failures:
     print("\n".join(failures), file=sys.stderr)
     sys.exit(1)
+hop = manifest("rx-hop")
+for name, key in (("HOP_ADVANCE", "hop_advance"), ("HOP_INITIAL", "hop_initial"),
+                  ("HOP_TRACE", "hop_trace"), ("CHANNEL_CONFIG", "channel_config"),
+                  ("CSA2", "csa2")):
+    check(f"rx_hop::offsets::{name}", constant(name, 10), hop["resident_offsets"][key])
+check("rx_hop::radio::CHANNEL_ID", constant("CHANNEL_ID", 16), hop["radio"]["channel_id"])
+check("rx_hop::radio::EVENT_COUNTER_INITIAL", constant("EVENT_COUNTER_INITIAL", 10),
+      hop["radio"]["event_counter_initial"])
+
 print(
-    "ABI constants match all three manifests: identity, bootstrap, pointers, "
+    "ABI constants match all four manifests: identity, bootstrap, pointers, "
     "transport, radio, offsets and per-image allocation sizes."
 )

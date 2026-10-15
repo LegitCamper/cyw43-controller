@@ -150,7 +150,7 @@ pub async fn install<R: Runtime>(runner: &mut R) -> Result<Installed, Error> {
 /// a Read Local Version Information task wake every 250 ms; the stream installer
 /// wakes from radio callbacks. Drain `BtDriver` promptly. Reset ends the session.
 pub struct InstalledRxDiagnostic {
-    /// Controller-owned 1024-byte allocation, retained until chip restart.
+    /// Controller-owned allocation, retained until chip restart.
     pub allocation: u32,
     transport: u32,
     started: bool,
@@ -242,6 +242,17 @@ pub async fn install_rx_stream_diagnostic<R: Runtime>(
     install_rx(runner, Mode::RxStream).await
 }
 
+/// Install continuous open-loop CSA#2 hopping RX.
+///
+/// Event zero starts on its computed channel and every matching stock RX
+/// callback advances once. This deliberately has no BIGInfo-derived anchor;
+/// callers must not treat successful installation as broadcast synchrony.
+pub async fn install_rx_hop_diagnostic<R: Runtime>(
+    runner: &mut R,
+) -> Result<InstalledRxDiagnostic, Error> {
+    install_rx(runner, Mode::RxHop).await
+}
+
 async fn install_rx<R: Runtime>(
     runner: &mut R,
     mode: Mode,
@@ -275,6 +286,7 @@ enum Mode {
     Tx,
     Rx,
     RxStream,
+    RxHop,
 }
 
 impl Mode {
@@ -299,6 +311,11 @@ impl Mode {
                 blob::rx_stream::IMAGE,
                 blob::rx_stream::ALLOCATOR,
                 blob::rx_stream::ALLOCATION_BYTES,
+            ),
+            Self::RxHop => (
+                blob::rx_hop::IMAGE,
+                blob::rx_hop::ALLOCATOR,
+                blob::rx_hop::ALLOCATION_BYTES,
             ),
         }
     }
